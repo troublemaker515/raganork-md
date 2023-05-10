@@ -11,3 +11,4 @@ ENV TZ=Asia/Kolkata
 RUN yarn install --network-concurrency 1
 
 CMD ["node", "index.js"]
+EXPOSE 3000
