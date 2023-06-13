@@ -3,6 +3,24 @@ Licensed under the  GPL-3.0 License;
 you may not use this file except in compliance with the License.
 Raganork MD - Sourav KL11
 */
+function checkLinks(links, allowedWords) {
+    let testArray = []
+    for (let i = 0; i < links.length; i++) {
+      const link = links[i];
+      let isAllowed = true;
+      for (let j = 0; j < allowedWords.length; j++) {
+        const allowedWord = allowedWords[j];
+        if (link.includes(allowedWord)) {
+          isAllowed = true; // Word is allowed
+          break;
+        }
+        isAllowed = false; // Word is not allowed
+      }
+      
+        testArray.push(isAllowed)
+      }
+    return testArray.includes(false)
+  }
 async function sendButton(buttons,text,footer,message){
     const buttonMessage = {text,footer,buttons,headerType: 1}
     return await message.client.sendMessage(message.jid, buttonMessage)
@@ -32,7 +50,7 @@ async function sendButton(buttons,text,footer,message){
     const Config = require('../config');
     const config = require('../config');
     const {getCommands} = require('./commands');
-    const {HEROKU} = require('../config');
+    const {HEROKU, settingsMenu} = require('../config');
     const Heroku = require('heroku-client');
     const fs = require('fs');
     const got = require('got');
@@ -143,6 +161,13 @@ fs.writeFileSync('./config.env', lines.join('\n'));
         await heroku.delete(baseURI + '/dynos').catch(async (error) => {
             await message.send(error.message)
         });
+    }));
+    Module({
+        pattern: 'platform',
+        fromMe: true,
+        use: 'owner'
+    }, (async (message, match) => {
+      return await message.sendReply(`_Bot is running on ${config.PLATFORM}_`)
     }));
     Module({
         pattern: 'shutdown$',
@@ -299,15 +324,7 @@ fs.writeFileSync('./config.env', lines.join('\n'));
         desc: "Bot settings to enable extra options related to WhatsApp bot functionality.",
         use: 'owner'
     }, (async (message, match) => {
-            let configs = [
-                    {title: "Auto read all messages", env_var: "READ_MESSAGES"},
-                    {title: "Auto read command messages", env_var: "READ_COMMAND"},
-                    {title: "Auto read status updates", env_var: "AUTO_READ_STATUS"},
-                    {title: "Auto reject calls", env_var: "REJECT_CALLS"},
-                    {title: "Always online", env_var: "ALWAYS_ONLINE"},
-                    {title: "PM Auto blocker", env_var: "PMB_VAR"},
-                    {title: "Disable bot in PM", env_var: "DIS_PM"}
-                ]
+            let configs = settingsMenu
         let msgToBeSent = "_*Settings configuration menu*_\n\n"+configs.map(e=>configs.indexOf(e)+1+'. _*'+e.title+'*_').join('\n')+'\n\n_Reply the number to continue_'
         return await message.sendReply(msgToBeSent)
         }));
@@ -329,7 +346,7 @@ fs.writeFileSync('./config.env', lines.join('\n'));
         use: 'owner'
     }, (async (message, mm) => {
    var m = message;
-        var newSudo = ( m.reply_message ? m.reply_message.jid : '' || m.mention[0] || match[1]).split("@")[0]
+        var newSudo = ( m.reply_message ? m.reply_message.jid : '' || m.mention[0] || mm[1]).split("@")[0]
 if (!newSudo) return await m.sendReply("*Need reply/mention/number*")
 const oldSudo = config.SUDO?.split(",")
     var newSudo = ( m.reply_message ? m.reply_message.jid : '' || m.mention[0] || mm[1]).split("@")[0]
@@ -508,10 +525,9 @@ const oldSudo = config.SUDO?.split(",")
             jids.push(data.jid)
         });
         if (jids.includes(message.jid)) {
-        var allowed = process.env.ALLOWED_LINKS || "gist,instagram,youtu";
-        var checker = [];
-        allowed.split(",").map(e=> checker.push(message.message.includes(e)))
-        if (!checker.includes(true)){
+        let allowed = (process.env.ALLOWED_LINKS || "gist,instagram,youtu").split(",");
+        let linksInMsg = message.message.match(/\bhttps?:\/\/\S+/gi)
+        if (checkLinks(linksInMsg,allowed)) {
         if (!(await isAdmin(message,message.sender))) {
         var usr = message.sender.includes(":") ? message.sender.split(":")[0]+"@s.whatsapp.net" : message.sender
         await message.client.sendMessage(message.jid, { delete: message.data.key })
