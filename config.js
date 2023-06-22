@@ -9,8 +9,11 @@ function convertToBool(text, fault = 'true',fault2='on') {
     return ((text === fault) || (text === fault2));
 }
 const settingsMenu = [
+    {title: "PM antispam block", env_var: "PM_ANTISPAM"},
     {title: "Auto read all messages", env_var: "READ_MESSAGES"},
     {title: "Auto read command messages", env_var: "READ_COMMAND"},
+    {title: "Auto read status updates", env_var: "AUTO_READ_STATUS"},
+    {title: "Admin sudo acces mode (group commands only)", env_var: "ADMIN_ACCESS"},
     {title: "With & without handler mode", env_var: "MULTI_HANDLERS"},
     {title: "Auto reject calls", env_var: "REJECT_CALLS"},
     {title: "Always online", env_var: "ALWAYS_ONLINE"},
@@ -24,7 +27,9 @@ module.exports = {
     VERSION: 'v4.0.0',
     ALIVE: process.env.ALIVE || "https://i.imgur.com/KCnoMM2.jpg Hey {sender}, I'm alive \n Uptime: {uptime}",
     BLOCK_CHAT: process.env.BLOCK_CHAT || '',
+    PM_ANTISPAM: convertToBool(process.env.PM_ANTISPAM) || '',
     ALWAYS_ONLINE: convertToBool(process.env.ALWAYS_ONLINE) || false,
+    ADMIN_ACCESS: convertToBool(process.env.ADMIN_ACCESS) || false,
     PLATFORM:isHeroku?"Heroku":isRailway?"Railway":isKoyeb?"Koyeb":"Other server",isHeroku,isKoyeb,isVPS,isRailway,
     AUTOMUTE_MSG: process.env.AUTOMUTE_MSG || '_Group automuted!_\n_(edit AUTOMUTE_MSG)_',
     ANTI_SPAM: process.env.ANTI_SPAM || '919074309534-1632403322@g.us',
