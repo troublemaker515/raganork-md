@@ -1,4 +1,4 @@
-FROM quay.io/souravkl11/rgnk-v2:latest
+FROM quay.io/souravkl11/rgnk-v3:latest
 
 
 
